@@ -3,7 +3,11 @@ import random
 import discord
 from discord.ext import commands
 
+<<<<<<< HEAD:src/commands.py
+from src.utility import read_list_from_file
+=======
 from utility import read_list_from_file
+>>>>>>> 2fb180235bb967d3b26937fa692fa3aa7464312f:commands.py
 
 yell_list = read_list_from_file('brain/yell.txt')
 yell_blacklist = read_list_from_file('brain/yell_blacklist.txt')
