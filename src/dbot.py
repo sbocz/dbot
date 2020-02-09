@@ -14,6 +14,8 @@ from utility import read_list_from_file
 command_prefix = '!'
 token = ''
 logger = logging.getLogger('discord')
+rate = 10
+period = 120
 PLAYING_ACTIVITY = 'PLAYING'
 LISTENING_ACTIVITY = 'LISTENING'
 WATCHING_ACTIVITY = 'WATCHING'

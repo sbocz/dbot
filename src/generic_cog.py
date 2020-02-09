@@ -1,11 +1,16 @@
 import random
+from ratelimit import limits
 import discord
 from discord.ext import commands
+from discord.ext.commands import BucketType
+
 from utility import read_list_from_file
 
 yell_list = read_list_from_file('brain/yell.txt')
 yell_blacklist = read_list_from_file('brain/yell_blacklist.txt')
 fortunes = read_list_from_file('brain/fortunes.txt')
+rate = 10
+period = 120
 
 
 class GenericCog(commands.Cog, name='Generic'):
@@ -27,24 +32,29 @@ class GenericCog(commands.Cog, name='Generic'):
         self.logger.debug('Firing on_message event')
         if message.author.id == self.bot.user.id:
             return
-
         if len(str(message.content)) > 2 and str(message.content).isupper():
-            self.logger.info(f'Firing \'yell\' command for message \'{message.content}\'')
-            choice = random.choice(yell_list)
+            await self.yell(message)
 
-            if not any(word in message.content for word in yell_blacklist):
-                self.logger.info("Added '{0}' to capsList".format(message.content))
-                yell_list.append(message.content)
+    @limits(calls=rate, period=period)
+    async def yell(self, message):
+        self.logger.info(f'Firing \'yell\' command for message \'{message.content}\'')
+        choice = random.choice(yell_list)
 
-            await message.channel.send(choice)
-            return
+        if not any(word in message.content for word in yell_blacklist):
+            self.logger.info("Added '{0}' to capsList".format(message.content))
+            yell_list.append(message.content)
+
+        await message.channel.send(choice)
+        return
 
     @commands.command()
+    @commands.cooldown(rate, period, BucketType.user)
     async def add(self, ctx, left: int, right: int):
         """Adds two numbers together."""
         await ctx.send(left + right)
 
     @commands.command()
+    @commands.cooldown(rate, period, BucketType.user)
     async def roll(self, ctx, dice: str):
         """Rolls a dice in NdN format."""
         try:
@@ -61,27 +71,32 @@ class GenericCog(commands.Cog, name='Generic'):
         await ctx.send(result)
 
     @commands.command(description='For when you wanna settle the score some other way')
+    @commands.cooldown(rate, period, BucketType.user)
     async def choose(self, ctx, *choices: str):
         """Chooses between multiple choices."""
         await ctx.send(random.choice(choices))
 
     @commands.command(description='Poke me')
+    @commands.cooldown(rate, period, BucketType.user)
     async def ping(self, ctx):
         await ctx.send('PONG')
 
     @commands.command()
+    @commands.cooldown(rate, period, BucketType.user)
     async def repeat(self, ctx, times: int, content='repeating...'):
         """Repeats a message multiple times."""
         for i in range(times):
             await ctx.send(content)
 
     @commands.command()
+    @commands.cooldown(rate, period, BucketType.user)
     async def joined(self, ctx, member: discord.Member):
         """Says when a member joined."""
         await ctx.send(
             f"{member.name} joined on {member.joined_at.year}-{member.joined_at.month}-{member.joined_at.day}")
 
     @commands.command(name='8ball')
+    @commands.cooldown(rate, period, BucketType.user)
     async def eight_ball(self, ctx):
         """Fortunes from beyond."""
         choice = random.choice(fortunes)
