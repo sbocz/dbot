@@ -7,10 +7,15 @@ from discord.ext import commands, tasks
 from discord import ActivityType
 from dotenv import load_dotenv
 from commands import Dbot
+from utility import read_list_from_file
 
 command_prefix = '!'
 token = ''
 logger = logging.getLogger('discord')
+PLAYING_ACTIVITY = 'PLAYING'
+LISTENING_ACTIVITY = 'LISTENING'
+WATCHING_ACTIVITY = 'WATCHING'
+STREAMING_ACTIVITY = 'STREAMING'
 
 
 def configure_logging(logging_level, filename):
@@ -41,15 +46,30 @@ configure_logging(logging.INFO, 'logs/discord.log')
 bot = commands.Bot(command_prefix=command_prefix, description='Discord bot tapped into Esbee\'s subconscious')
 
 
+def build_statuses():
+    # Format of the file is "PLAYING|Game", etc.
+    status_list = read_list_from_file('brain/statuses.txt')
+    statuses = []
+    for item_parsed in status_list:
+        pair = item_parsed.split('|')
+        switcher = {
+            WATCHING_ACTIVITY: ActivityType.watching,
+            LISTENING_ACTIVITY: ActivityType.listening,
+            PLAYING_ACTIVITY: ActivityType.playing,
+            STREAMING_ACTIVITY: ActivityType.streaming
+        }
+
+        # Build status tuple eg. ('Game', ActivityType.playing)
+        status = (pair[1], switcher.get(pair[0], ActivityType.playing))
+        statuses.append(status)
+    return statuses
+
+
 @tasks.loop(minutes=20.0)
 async def change_status():
-    statuses = [
-        (ActivityType.playing, 'with the other HUMANS'),
-        (ActivityType.listening, 'your microphone'),
-        (ActivityType.watching, 'Marc sleep')
-    ]
+    statuses = build_statuses()
     choice = random.choice(statuses)
-    activity = discord.Activity(name=choice[1], type=choice[0])
+    activity = discord.Activity(name=choice[0], type=choice[1])
     logger.info('Updating status message: {0}'.format(activity))
     await bot.change_presence(activity=activity)
 
