@@ -6,8 +6,13 @@ import random
 from discord.ext import commands, tasks
 from discord import ActivityType
 from dotenv import load_dotenv
+<<<<<<< HEAD:src/dbot.py
 from src.commands import Dbot
 from src.utility import read_list_from_file
+=======
+from commands import Dbot
+from utility import read_list_from_file
+>>>>>>> 2fb180235bb967d3b26937fa692fa3aa7464312f:dbot.py
 
 command_prefix = '!'
 token = ''
