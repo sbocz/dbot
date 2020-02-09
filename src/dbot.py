@@ -16,10 +16,6 @@ token = ''
 logger = logging.getLogger('discord')
 rate = 10
 period = 120
-PLAYING_ACTIVITY = 'PLAYING'
-LISTENING_ACTIVITY = 'LISTENING'
-WATCHING_ACTIVITY = 'WATCHING'
-STREAMING_ACTIVITY = 'STREAMING'
 
 
 def configure_logging(logging_level, filename):
@@ -48,40 +44,6 @@ configure_logging(logging.INFO, 'logs/discord.log')
 
 # Initialize bot
 bot = commands.Bot(command_prefix=command_prefix, description='Discord bot tapped into Esbee\'s subconscious')
-
-
-def build_statuses():
-    # Format of the file is "PLAYING|Game", etc.
-    status_list = read_list_from_file('brain/statuses.txt')
-    statuses = []
-    for item_parsed in status_list:
-        pair = item_parsed.split('|')
-        switcher = {
-            WATCHING_ACTIVITY: ActivityType.watching,
-            LISTENING_ACTIVITY: ActivityType.listening,
-            PLAYING_ACTIVITY: ActivityType.playing,
-            STREAMING_ACTIVITY: ActivityType.streaming
-        }
-
-        # Build status tuple eg. ('Game', ActivityType.playing)
-        status = (pair[1], switcher.get(pair[0], ActivityType.playing))
-        statuses.append(status)
-    return statuses
-
-
-@tasks.loop(minutes=20.0)
-async def change_status():
-    statuses = build_statuses()
-    choice = random.choice(statuses)
-    activity = discord.Activity(name=choice[0], type=choice[1])
-    logger.info('Updating status message: {0}'.format(activity))
-    await bot.change_presence(activity=activity)
-
-
-@bot.event
-async def on_ready():
-    logger.info('Firing on_ready event')
-    change_status.start()
 
 bot.add_cog(GenericCog(bot, logger))
 bot.run(token)

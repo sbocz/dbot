@@ -1,11 +1,17 @@
 import random
+
+from discord import ActivityType
 from ratelimit import limits
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
 from utility import read_list_from_file
 
+PLAYING_ACTIVITY = 'PLAYING'
+LISTENING_ACTIVITY = 'LISTENING'
+WATCHING_ACTIVITY = 'WATCHING'
+STREAMING_ACTIVITY = 'STREAMING'
 yell_list = read_list_from_file('brain/yell.txt')
 yell_blacklist = read_list_from_file('brain/yell_blacklist.txt')
 fortunes = read_list_from_file('brain/fortunes.txt')
@@ -101,3 +107,35 @@ class GenericCog(commands.Cog, name='Generic'):
         """Fortunes from beyond."""
         choice = random.choice(fortunes)
         await ctx.send(choice)
+
+    @staticmethod
+    def build_statuses():
+        # Format of the file is "PLAYING|Game", etc.
+        status_list = read_list_from_file('brain/statuses.txt')
+        statuses = []
+        for item_parsed in status_list:
+            pair = item_parsed.split('|')
+            switcher = {
+                WATCHING_ACTIVITY: ActivityType.watching,
+                LISTENING_ACTIVITY: ActivityType.listening,
+                PLAYING_ACTIVITY: ActivityType.playing,
+                STREAMING_ACTIVITY: ActivityType.streaming
+            }
+
+            # Build status tuple eg. ('Game', ActivityType.playing)
+            status = (pair[1], switcher.get(pair[0], ActivityType.playing))
+            statuses.append(status)
+        return statuses
+
+    @tasks.loop(minutes=20.0)
+    async def change_status(self):
+        statuses = self.build_statuses()
+        choice = random.choice(statuses)
+        activity = discord.Activity(name=choice[0], type=choice[1])
+        self.logger.info('Updating status message: {0}'.format(activity))
+        await self.bot.change_presence(activity=activity)
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.logger.info('Firing on_ready event')
+        self.change_status.start()
