@@ -1,19 +1,13 @@
 import random
-import logging
-import os
 
 import discord
-from discord import ActivityType
-from discord.ext import commands, tasks
-from dotenv import load_dotenv
+from discord.ext import commands
 
+from src.utility import read_list_from_file
 
-capsList = [
-
-]
-
-blackList = [
-]
+yell_list = read_list_from_file('brain/yell.txt')
+yell_blacklist = read_list_from_file('brain/yell_blacklist.txt')
+fortunes = read_list_from_file('brain/fortunes.txt')
 
 
 class Dbot(commands.Cog):
@@ -38,16 +32,14 @@ class Dbot(commands.Cog):
 
         if len(str(message.content)) > 2 and str(message.content).isupper():
             self.logger.info(f'Firing \'yell\' command for message \'{message.content}\'')
-            choice = random.choice(capsList)
+            choice = random.choice(yell_list)
 
-            if not any(word in message.content for word in blackList):
+            if not any(word in message.content for word in yell_blacklist):
                 self.logger.info("Added '{0}' to capsList".format(message.content))
-                capsList.append(message.content)
+                yell_list.append(message.content)
 
             await message.channel.send(choice)
             return
-
-        # await self.bot.process_commands(message)
 
     @commands.command()
     async def add(self, ctx, left: int, right: int):
@@ -88,40 +80,11 @@ class Dbot(commands.Cog):
     @commands.command()
     async def joined(self, ctx, member: discord.Member):
         """Says when a member joined."""
-        await ctx.send('{0.name} joined on {0.joined_at.year}-{0.joined_at.month}-{0.joined_at.day}'.format(member))
+        await ctx.send(
+            f"{member.name} joined on {member.joined_at.year}-{member.joined_at.month}-{member.joined_at.day}")
 
     @commands.command(name='8ball')
     async def eight_ball(self, ctx):
         """Fortunes from beyond."""
-        fortunes = [
-            'Concentrate and ask again.',
-            'It is certain.',
-            'It is decidedly so.',
-            'Without a doubt.',
-            'Yes - definitely.',
-            'You may rely on it.',
-            'As I see it, yes.',
-            'Most likely.',
-            'Outlook good.',
-            'Yes.',
-            'Signs point to yes.',
-            'Reply hazy, try again.',
-            'Ask again later.',
-            'Better not tell you now.',
-            'Cannot predict now.',
-            'Don\'t count on it.',
-            'My reply is no.',
-            'My sources say no.',
-            'Outlook not so good.',
-            'Very doubtful.',
-            'Bruh...',
-            'It\'s entirely possible.',
-            'Yas Queen.',
-            'It is known.',
-            'Only Allah knows.',
-            'Not today.',
-            ':thumbsdown:',
-            ':potato:',
-        ]
         choice = random.choice(fortunes)
         await ctx.send(choice)
