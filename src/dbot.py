@@ -1,15 +1,10 @@
 import logging
 import os
-import discord
-import random
 
-from discord.ext import commands, tasks
-from discord import ActivityType
+from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.generic_cog import GenericCog
-from src.utility import read_list_from_file
-from utility import read_list_from_file
+from src.cogs.generic_cog import GenericCog
 
 command_prefix = '!'
 token = ''
@@ -45,5 +40,5 @@ configure_logging(logging.INFO, 'logs/discord.log')
 # Initialize bot
 bot = commands.Bot(command_prefix=command_prefix, description='Discord bot tapped into Esbee\'s subconscious')
 
-bot.add_cog(GenericCog(bot, logger))
+bot.add_cog(GenericCog(bot))
 bot.run(token)
