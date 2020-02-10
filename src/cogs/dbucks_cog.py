@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from operator import itemgetter
 
 import discord
 from discord.ext import commands, tasks
@@ -8,10 +9,11 @@ from src.utility import read_list_from_file, write_list_to_file
 
 log = logging.getLogger('discord')
 BANK_FILE = 'brain/bank.txt'
+CURRENCY = '𝔻'
 
 
 class DbucksCog(commands.Cog, name='dbucks'):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self._last_member = None
         self.accounts = self.load_accounts(BANK_FILE)
@@ -22,7 +24,7 @@ class DbucksCog(commands.Cog, name='dbucks'):
         accounts = {}
         for account in account_list:
             parsed_account = account.split("|")
-            accounts[parsed_account[0]] = {'value': int(parsed_account[1]), 'interest_date': datetime.fromtimestamp(int(float(parsed_account[2])))}
+            accounts[int(parsed_account[0])] = {'value': int(parsed_account[1]), 'interest_date': datetime.fromtimestamp(int(float(parsed_account[2])))}
         return accounts
 
     def save_accounts(self):
@@ -85,6 +87,21 @@ class DbucksCog(commands.Cog, name='dbucks'):
             self.save_accounts()
             await ctx.send(f"Thank you for registering your account {ctx.author.mention}! Your balance is {self.accounts[user_id]['value']} dbucks")
 
+    @bank.command(name='accounts')
+    async def _accounts(self, ctx):
+        """
+        List bank accounts and their balances
+        """
+        result = ''
+        account_tuples = []
+        for account_id in self.accounts.keys():
+            user: discord.User = self.bot.get_user(account_id)
+            account_tuples.append((user.name, self.accounts[account_id]['value']))
+        account_tuples.sort(key=itemgetter(1))
+        for account in account_tuples:
+            result += f'{account[0]} has a balance of {account[1]}{CURRENCY}\n'
+        await ctx.send(result)
+
     @commands.command(name='balance')
     async def balance(self, ctx, member: discord.Member = None):
         """
@@ -130,7 +147,7 @@ class DbucksCog(commands.Cog, name='dbucks'):
                 f'Hmmm, looks like {member.mention} doesn\'t have an account yet. Try the "bank openaccount" command.')
             return
         self.accounts[user_id]["value"] -= value
-        self.accounts[member.id]["value"] += value
+        self.accounts[int(member.id)]["value"] += value
         await ctx.send(
-            f'{ctx.author.mention} tipped {member.mention} 𝔻 {value:,}')
+            f'{ctx.author.mention} tipped {member.mention} {value:,}{CURRENCY}')
         self.save_accounts()
