@@ -8,12 +8,19 @@ import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
-from utility import read_list_from_file, write_list_to_file
+from src.utility import read_list_from_file, write_list_to_file
 
+# Status constants
 PLAYING_ACTIVITY = 'PLAYING'
 LISTENING_ACTIVITY = 'LISTENING'
 WATCHING_ACTIVITY = 'WATCHING'
 STREAMING_ACTIVITY = 'STREAMING'
+
+# File constants
+YELL_FILE = 'brain/yell.txt'
+YELL_BLACKLIST_FILE = 'brain/yell_blacklist.txt'
+FORTUNES = 'brain/fortunes.txt'
+STATUSES_FILE = 'brain/statuses.txt'
 
 rate = 10
 period = 120
@@ -24,10 +31,10 @@ class GenericCog(commands.Cog, name='Generic'):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
-        self.yell_list = read_list_from_file('brain/yell.txt')
-        self.yell_blacklist = read_list_from_file('brain/yell_blacklist.txt')
-        self.fortunes = read_list_from_file('brain/fortunes.txt')
-        self.statuses = self.build_statuses('brain/statuses.txt')
+        self.yell_list = read_list_from_file(YELL_FILE)
+        self.yell_blacklist = read_list_from_file(YELL_BLACKLIST_FILE)
+        self.fortunes = read_list_from_file(FORTUNES)
+        self.statuses = self.build_statuses(STATUSES_FILE)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -125,9 +132,10 @@ class GenericCog(commands.Cog, name='Generic'):
 
     @tasks.loop(minutes=60.0)
     async def backup_brain(self):
-        write_list_to_file('brain/yell.txt', list(set(self.yell_list)))
-        write_list_to_file('brain/yell_blacklist.txt', list(set(self.yell_blacklist)))
-        write_list_to_file('brain/fortunes.txt', list(set(self.fortunes)))
+        log.info("Backing up the Generic Cog")
+        write_list_to_file(YELL_FILE, list(set(self.yell_list)))
+        write_list_to_file(YELL_BLACKLIST_FILE, list(set(self.yell_blacklist)))
+        write_list_to_file(FORTUNES, list(set(self.fortunes)))
 
     @commands.Cog.listener()
     async def on_ready(self):
