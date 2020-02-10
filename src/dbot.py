@@ -4,6 +4,7 @@ import os
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from src.cogs.dbucks_cog import DbucksCog
 from src.cogs.generic_cog import GenericCog
 
 command_prefix = '!'
@@ -41,4 +42,5 @@ configure_logging(logging.INFO, 'logs/discord.log')
 bot = commands.Bot(command_prefix=command_prefix, description='Discord bot tapped into Esbee\'s subconscious')
 
 bot.add_cog(GenericCog(bot))
+bot.add_cog(DbucksCog(bot))
 bot.run(token)

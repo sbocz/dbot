@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
-from utility import read_list_from_file, write_list_to_file
+from src.utility import read_list_from_file, write_list_to_file
 
 PLAYING_ACTIVITY = 'PLAYING'
 LISTENING_ACTIVITY = 'LISTENING'
@@ -125,6 +125,7 @@ class GenericCog(commands.Cog, name='Generic'):
 
     @tasks.loop(minutes=60.0)
     async def backup_brain(self):
+        log.info("Backing up the Generic Cog")
         write_list_to_file('brain/yell.txt', list(set(self.yell_list)))
         write_list_to_file('brain/yell_blacklist.txt', list(set(self.yell_blacklist)))
         write_list_to_file('brain/fortunes.txt', list(set(self.fortunes)))
