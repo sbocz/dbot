@@ -1,13 +1,8 @@
 import logging
-import random
-import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from discord import ActivityType
-from ratelimit import limits
 import discord
 from discord.ext import commands, tasks
-from discord.ext.commands import BucketType
 
 from src.utility import read_list_from_file, write_list_to_file
 
@@ -69,7 +64,9 @@ class DbucksCog(commands.Cog, name='dbucks'):
 
     @bank.command(name='help')
     async def _help(self, ctx):
-        """HELP"""
+        """
+        HELP
+        """
         await ctx.send_help(ctx.command.parent)
 
     @bank.command(name='openaccount')
