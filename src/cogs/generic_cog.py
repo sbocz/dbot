@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import traceback
 
@@ -8,19 +9,15 @@ import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
-from src.utility import read_list_from_file, write_list_to_file
+from src.status import Status
+from src.utility import read_json_from_file, write_json_to_file
 
-# Status constants
-PLAYING_ACTIVITY = 'PLAYING'
-LISTENING_ACTIVITY = 'LISTENING'
-WATCHING_ACTIVITY = 'WATCHING'
-STREAMING_ACTIVITY = 'STREAMING'
 
 # File constants
-YELL_FILE = 'brain/yell.txt'
-YELL_BLACKLIST_FILE = 'brain/yell_blacklist.txt'
-FORTUNES = 'brain/fortunes.txt'
-STATUSES_FILE = 'brain/statuses.txt'
+YELL_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'yell.json')
+YELL_BLACKLIST_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'yell_blacklist.json')
+FORTUNES = os.path.join(os.getenv('BRAIN_PATH'), 'fortunes.json')
+STATUSES_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'statuses.json')
 
 rate = 10
 period = 120
@@ -31,9 +28,9 @@ class GenericCog(commands.Cog, name='Generic'):
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
-        self.yell_list = read_list_from_file(YELL_FILE)
-        self.yell_blacklist = read_list_from_file(YELL_BLACKLIST_FILE)
-        self.fortunes = read_list_from_file(FORTUNES)
+        self.yell_list = read_json_from_file(YELL_FILE)
+        self.yell_blacklist = read_json_from_file(YELL_BLACKLIST_FILE)
+        self.fortunes = read_json_from_file(FORTUNES)
         self.statuses = self.build_statuses(STATUSES_FILE)
 
     @commands.Cog.listener()
@@ -107,35 +104,25 @@ class GenericCog(commands.Cog, name='Generic'):
     @staticmethod
     def build_statuses(filename):
         # Format of the file is "PLAYING|Game", etc.
-        status_list = read_list_from_file(filename)
+        json_list = read_json_from_file(filename)
         statuses = []
-        for item_parsed in status_list:
-            pair = item_parsed.split('|')
-            switcher = {
-                WATCHING_ACTIVITY: ActivityType.watching,
-                LISTENING_ACTIVITY: ActivityType.listening,
-                PLAYING_ACTIVITY: ActivityType.playing,
-                STREAMING_ACTIVITY: ActivityType.streaming
-            }
-
-            # Build status tuple eg. ('Game', ActivityType.playing)
-            status = (pair[1], switcher.get(pair[0], ActivityType.playing))
+        for d in json_list:
+            status = Status.from_dict(d)
             statuses.append(status)
         return statuses
 
     @tasks.loop(minutes=20.0)
     async def change_status(self):
-        choice = random.choice(self.statuses)
-        activity = discord.Activity(name=choice[0], type=choice[1])
-        log.info(f'Updating status message: {activity}')
-        await self.bot.change_presence(activity=activity)
+        choice: Status = random.choice(self.statuses)
+        log.info(f'Updating status message: {choice.activity}')
+        await self.bot.change_presence(activity=choice.activity)
 
     @tasks.loop(minutes=60.0)
     async def backup_brain(self):
         log.info("Backing up the Generic Cog")
-        write_list_to_file(YELL_FILE, list(set(self.yell_list)))
-        write_list_to_file(YELL_BLACKLIST_FILE, list(set(self.yell_blacklist)))
-        write_list_to_file(FORTUNES, list(set(self.fortunes)))
+        write_json_to_file(YELL_FILE, list(set(self.yell_list)))
+        write_json_to_file(YELL_BLACKLIST_FILE, list(set(self.yell_blacklist)))
+        write_json_to_file(FORTUNES, list(set(self.fortunes)))
 
     @commands.Cog.listener()
     async def on_ready(self):
