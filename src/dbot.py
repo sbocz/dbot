@@ -4,6 +4,8 @@ import os
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from src.clients.inspirobot_client import InspirobotClient
+from src.clients.urban_dictionary_client import UrbanDictionaryClient
 from src.cogs.stock_cog import StockCog
 from src.commerce.bank import Bank
 from src.cogs.dbucks_cog import DbucksCog
@@ -49,7 +51,7 @@ bot = commands.Bot(command_prefix=command_prefix, description='Discord bot tappe
 
 bank = Bank()
 market = Market()
-bot.add_cog(GenericCog(bot))
+bot.add_cog(GenericCog(bot, InspirobotClient(), UrbanDictionaryClient()))
 bot.add_cog(DbucksCog(bot, bank))
 bot.add_cog(StockCog(bot, bank, market))
 bot.run(token)

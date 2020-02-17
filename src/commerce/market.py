@@ -14,7 +14,7 @@ load_dotenv()
 STOCKS_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'stocks.json')
 STOCK_HOLDINGS_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'stock_holdings.json')
 MAX_BASE_VOLATILITY = 0.2
-TETHER = 500
+TETHER = 400
 MAX_TETHER_VOLATILITY = 0.15
 MAX_PERCENTILE_FOR_BIG_SWING = 0.7
 BIG_SWING_MIN = 10

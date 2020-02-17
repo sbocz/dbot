@@ -9,9 +9,10 @@ import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
+from src.clients.inspirobot_client import InspirobotClient
+from src.clients.urban_dictionary_client import UrbanDictionaryClient
 from src.status import Status
 from src.utility import read_json_from_file, write_json_to_file
-
 
 # File constants
 YELL_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'yell.json')
@@ -25,7 +26,9 @@ log = logging.getLogger('discord')
 
 
 class GenericCog(commands.Cog, name='Generic'):
-    def __init__(self, bot):
+    def __init__(self, bot, inspirobot: InspirobotClient, urban_dictionary: UrbanDictionaryClient):
+        self.urban_dictionary = urban_dictionary
+        self.inspirobot = inspirobot
         self.bot = bot
         self._last_member = None
         self.yell_list = read_json_from_file(YELL_FILE)
@@ -100,6 +103,27 @@ class GenericCog(commands.Cog, name='Generic'):
         """Fortunes from beyond."""
         choice = random.choice(self.fortunes)
         await ctx.send(choice)
+
+    @commands.command(name='inspire')
+    @commands.cooldown(5, 60, BucketType.guild)
+    async def inspire(self, ctx):
+        """For when you need a pick-me-up."""
+        url = await self.inspirobot.generate_inspirational_message()
+        await ctx.send(url)
+
+    @commands.command(name='define')
+    @commands.cooldown(10, 60 * 5, BucketType.guild)
+    async def define(self, ctx, term_to_define: str, number_to_list: int = 1):
+        """Define a term."""
+        definition_list = await self.urban_dictionary.define(term_to_define)
+        for definition in definition_list[:number_to_list]:
+            message = \
+                f'''=====
+_{definition.word}_ \n
+{definition.definition} \n
+>>> {definition.example} \n
+'''
+            await ctx.send(message)
 
     @staticmethod
     def build_statuses(filename):
