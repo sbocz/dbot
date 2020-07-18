@@ -1,5 +1,9 @@
-import logging
 import os
+import sys
+sys.path.append(os.pardir)
+sys.path.append(os.path.join(os.pardir, os.pardir))
+
+import logging
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -22,7 +26,7 @@ brain_path = ''
 
 def configure_logging(logging_level, filename):
     logger.setLevel(logging_level)
-    handler = logging.FileHandler(filename=filename, encoding='utf-8', mode='w')
+    handler = logging.FileHandler(filename=filename, encoding='utf-8')
     handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
     logger.addHandler(handler)
 
