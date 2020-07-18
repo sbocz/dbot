@@ -28,7 +28,7 @@ class StockCog(commands.Cog, name='stock'):
         self.bot = bot
         self._last_member = None
 
-    @tasks.loop(minutes=19.0)
+    @tasks.loop(minutes=43.0)
     async def randomize_stocks(self):
         log.info("Randomizing Stocks")
         for stock in self.market.stocks:

@@ -53,13 +53,14 @@ class GenericCog(commands.Cog, name='Generic'):
     @limits(calls=rate, period=period)
     async def yell(self, message):
         log.info(f'Firing \'yell\' command for message \'{message.content}\'')
-        choice = random.choice(self.yell_list)
 
         if not any(word in message.content for word in self.yell_blacklist):
             log.info("Added '{0}' to capsList".format(message.content))
             self.yell_list.append(message.content)
-
-        await message.channel.send(choice)
+            choice = random.choice(self.yell_list)
+            await message.channel.send(choice)
+        else:
+            await message.channel.send("My mother taught me not to say things like that!")
         return
 
     @commands.command()
@@ -105,7 +106,7 @@ class GenericCog(commands.Cog, name='Generic'):
         await ctx.send(choice)
 
     @commands.command(name='inspire')
-    @commands.cooldown(5, 60, BucketType.guild)
+    @commands.cooldown(5, 120, BucketType.guild)
     async def inspire(self, ctx):
         """For when you need a pick-me-up."""
         url = await self.inspirobot.generate_inspirational_message()
