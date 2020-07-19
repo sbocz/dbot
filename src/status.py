@@ -9,7 +9,7 @@ STREAMING_ACTIVITY = 'STREAMING'
 
 
 class Status:
-
+    '''Discord status data object'''
     text: str
     activity_type: ActivityType
     activity: Activity
@@ -20,11 +20,12 @@ class Status:
         self.activity = Activity(name=self.text, type=self.activity_type)
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(dictionary):
+        '''Constructs a status from a dictionary'''
         switcher = {
             WATCHING_ACTIVITY: ActivityType.watching,
             LISTENING_ACTIVITY: ActivityType.listening,
             PLAYING_ACTIVITY: ActivityType.playing,
             STREAMING_ACTIVITY: ActivityType.streaming
         }
-        return Status(str(d['text']), switcher.get(d['activity_type'], ActivityType.playing))
+        return Status(str(dictionary['text']), switcher.get(dictionary['activity_type'], ActivityType.playing))

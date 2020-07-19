@@ -12,6 +12,7 @@ CURRENCY = '𝔻'
 
 
 class DbucksCog(commands.Cog, name='dbucks'):
+    """Commands for interacting with currency"""
     def __init__(self, bot: commands.Bot, bank: Bank):
         self.bot = bot
         self._last_member = None
@@ -19,29 +20,31 @@ class DbucksCog(commands.Cog, name='dbucks'):
 
     @tasks.loop(hours=6.0)
     async def pay_interest(self):
+        """Triggers the bank to pay interest on a timer"""
         log.info("Paying interest")
         self.bank.pay_interest()
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Starts all currency related tasks"""
         self.pay_interest.start()
 
     @commands.group(name='bank')
-    async def bank(self, ctx):
+    async def bank_command(self, ctx):
         """
         Interact with the bank
         """
         if ctx.invoked_subcommand is None:
             await ctx.send(f'bank "{ctx.subcommand_passed}" is not a command')
 
-    @bank.command(name='help')
+    @bank_command.command(name='help')
     async def _help(self, ctx):
         """
         HELP
         """
         await ctx.send_help(ctx.command.parent)
 
-    @bank.command(name='openaccount')
+    @bank_command.command(name='openaccount')
     async def _openaccount(self, ctx):
         """
         Create an account
@@ -56,7 +59,7 @@ class DbucksCog(commands.Cog, name='dbucks'):
             user_account = self.bank.create_account(user_id, days_in_guild * 10)
             await ctx.send(f"Thank you for registering your account {ctx.author.mention}! Your balance is {user_account.value} dbucks")
 
-    @bank.command(name='accounts')
+    @bank_command.command(name='accounts')
     async def _accounts(self, ctx):
         """
         List bank accounts and their balances

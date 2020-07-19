@@ -4,6 +4,7 @@ log = logging.getLogger('discord')
 
 
 class Stock:
+    """Stock data object"""
     available: int
     value: int
     ticker: str
@@ -14,5 +15,6 @@ class Stock:
         self.ticker = ticker
 
     @staticmethod
-    def from_dict(d):
-        return Stock(str(d['ticker']), int(d['available']), int(d['value']))
+    def from_dict(dictionary):
+        """Constructs a Stock from a dictionary"""
+        return Stock(str(dictionary['ticker']), int(dictionary['available']), int(dictionary['value']))
