@@ -5,6 +5,7 @@ log = logging.getLogger('discord')
 
 
 class Definition:
+    """A definition data object"""
 
     def __init__(self, definition: str, permalink: str, author: str, word: str, example: str):
         self.example = re.sub(r"[\[\]]", "", example)
@@ -14,6 +15,7 @@ class Definition:
         self.definition = re.sub(r"[\[\]]", "", definition)
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(dictionary):
+        """Convert a dictionary to a definition"""
         return Definition(
-            str(d['definition']), str(d['permalink']), str(d['author']), str(d['word']), str(d['example']))
+            str(dictionary['definition']), str(dictionary['permalink']), str(dictionary['author']), str(dictionary['word']), str(dictionary['example']))

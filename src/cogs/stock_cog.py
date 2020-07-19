@@ -1,7 +1,4 @@
 import logging
-import random
-from operator import itemgetter
-
 import discord
 from discord.ext import commands, tasks
 
@@ -17,11 +14,9 @@ STOCK_STARTING_PRICE = 100
 STOCK_STARTING_AVAILABILITY = 100
 
 
-def rand():
-    return random.random()
-
-
 class StockCog(commands.Cog, name='stock'):
+    """Commands for interacting with the fake stock market"""
+
     def __init__(self, bot: commands.Bot, bank: Bank, market: Market):
         self.market = market
         self.bank = bank
@@ -30,6 +25,7 @@ class StockCog(commands.Cog, name='stock'):
 
     @tasks.loop(minutes=43.0)
     async def randomize_stocks(self):
+        """Randomizes the existing stock values"""
         log.info("Randomizing Stocks")
         for stock in self.market.stocks:
             stock.value += int(self.market.get_change(stock.value))
@@ -37,6 +33,7 @@ class StockCog(commands.Cog, name='stock'):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Starts stock related tasks"""
         self.randomize_stocks.start()
 
     @commands.command(name='invest')
@@ -72,14 +69,14 @@ class StockCog(commands.Cog, name='stock'):
         user_id = ctx.author.id
         account = self.bank.get_account(user_id)
         if account is None:
-            await ctx.send(f'Hmmm, looks like you don\'t have an account yet.')
+            await ctx.send('Hmmm, looks like you don\'t have an account yet.')
             return
         stock = next(filter(lambda s: s.ticker == stock_ticker, self.market.stocks), None)
         if stock is None:
             await ctx.send(f'Stock with ticker {stock_ticker} does not exist.')
             return
         if quantity < 0:
-            await ctx.send(f'No.')
+            await ctx.send('No.')
             return
         if account.value < stock.value * quantity:
             await ctx.send(f'You do not have enough dbucks to buy {quantity} stocks of {stock_ticker}')
@@ -109,32 +106,32 @@ class StockCog(commands.Cog, name='stock'):
         user_id = ctx.author.id
         account = self.bank.get_account(user_id)
         if account is None:
-            await ctx.send(f'Hmmm, looks like you don\'t have an account yet.')
+            await ctx.send('Hmmm, looks like you don\'t have an account yet.')
             return
         stock = next(filter(lambda s: s.ticker == stock_ticker, self.market.stocks), None)
         if stock is None:
             await ctx.send(f'Stock with ticker {stock_ticker} does not exist.')
             return
         if quantity < 0:
-            await ctx.send(f'No.')
+            await ctx.send('No.')
             return
         holding = self.market.get_holding(account.account_id, stock.ticker)
         if holding is None or holding.quantity < quantity:
             await ctx.send(f'You do not have enough {stock_ticker}')
             return
-        else:
-            # Update stock
-            stock.available += quantity
-            self.market.save_stocks()
 
-            # Update holding
-            self.market.update_holding(account.account_id, stock.ticker, -1 * quantity)
+        # Update stock
+        stock.available += quantity
+        self.market.save_stocks()
 
-            # Update account
-            self.bank.receive_payment(account.account_id, stock.value * quantity)
+        # Update holding
+        self.market.update_holding(account.account_id, stock.ticker, -1 * quantity)
 
-            await ctx.send(
-                f"You have sold {quantity} shares of {stock_ticker} for {stock.value * quantity} dbucks!")
+        # Update account
+        self.bank.receive_payment(account.account_id, stock.value * quantity)
+
+        await ctx.send(
+            f"You have sold {quantity} shares of {stock_ticker} for {stock.value * quantity} dbucks!")
 
     @stock.command(name='holdings')
     async def _holdings(self, ctx, member: discord.Member = None):
@@ -160,7 +157,7 @@ class StockCog(commands.Cog, name='stock'):
             return
         else:
             if is_self:
-                await ctx.send(f'You don\'t have any stock holdings yet. Try buying some stock!')
+                await ctx.send('You don\'t have any stock holdings yet. Try buying some stock!')
             else:
                 await ctx.send(f'{user.name} doesn\'t have any stock holdings yet.')
 
@@ -185,14 +182,14 @@ class StockCog(commands.Cog, name='stock'):
         user_id = ctx.author.id
         account = self.bank.get_account(user_id)
         if account is None:
-            await ctx.send(f'Hmmm, looks like you don\'t have an account yet. You\'ll need one to make a stock')
+            await ctx.send('Hmmm, looks like you don\'t have an account yet. You\'ll need one to make a stock')
             return
         stock = next(filter(lambda s: s.ticker == ticker, self.market.stocks), None)
         if stock is not None:
             await ctx.send(f'Stock with ticker {ticker} already exists!')
             return
         if len(ticker) > 8 or not (ticker.isupper() and ticker.isalpha()):
-            await ctx.send(f'Please enter a valid ticker name (all uppercase letters and 8 or less characters)')
+            await ctx.send('Please enter a valid ticker name (all uppercase letters and 8 or less characters)')
             return
         if account.value < STOCK_CREATION_PRICE:
             await ctx.send(f'You do not have enough dbucks to create a stock. Stock creation costs {STOCK_CREATION_PRICE} dbucks')
@@ -203,4 +200,3 @@ class StockCog(commands.Cog, name='stock'):
         self.market.save_stocks()
         self.bank.make_payment(account.account_id, STOCK_CREATION_PRICE)
         await ctx.send(f'Stock {ticker} created!')
-
