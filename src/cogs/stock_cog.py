@@ -12,6 +12,7 @@ log = logging.getLogger('discord')
 STOCK_CREATION_PRICE = 1000
 STOCK_STARTING_PRICE = 100
 STOCK_STARTING_AVAILABILITY = 100
+MAX_STOCKS = 20
 
 
 class StockCog(commands.Cog, name='stock'):
@@ -176,8 +177,8 @@ class StockCog(commands.Cog, name='stock'):
         """
         Create and add a new stock to the market
         """
-        if len(self.market.stocks) + 1 > self.market.MAX_STOCKS:
-            await ctx.send(f'Maximum of {self.market.MAX_STOCKS} hit')
+        if len(self.market.stocks) + 1 > MAX_STOCKS:
+            await ctx.send(f'Maximum of {MAX_STOCKS} hit')
             return
         user_id = ctx.author.id
         account = self.bank.get_account(user_id)
