@@ -70,7 +70,9 @@ class DbucksCog(commands.Cog, name='dbucks'):
             log.info(f'Listing account for ID {account.account_id}')
             user: discord.User = self.bot.get_user(account.account_id)
             log.info(f'User retrieved {user}')
-            account_tuples.append((user.name, account.value))
+            # If an account is removed from Discord the account shows as None
+            if user != None:
+                account_tuples.append((user.name, account.value))
         account_tuples.sort(key=itemgetter(1))
         account_tuples.reverse()
         for account in account_tuples:
