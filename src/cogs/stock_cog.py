@@ -11,7 +11,7 @@ log = logging.getLogger('discord')
 
 STOCK_CREATION_PRICE = 1000
 STOCK_STARTING_PRICE = 100
-STOCK_STARTING_AVAILABILITY = 100
+STOCK_STARTING_AVAILABILITY = 1000
 MAX_STOCKS = 20
 
 
@@ -24,7 +24,7 @@ class StockCog(commands.Cog, name='stock'):
         self.bot = bot
         self._last_member = None
 
-    @tasks.loop(minutes=43.0)
+    @tasks.loop(minutes=57.0)
     async def randomize_stocks(self):
         """Randomizes the existing stock values"""
         log.info("Randomizing Stocks")
