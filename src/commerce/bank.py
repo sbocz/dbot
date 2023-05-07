@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from src.commerce.account import Account
 from src.utility import read_json_from_file, write_json_to_file
 
-load_dotenv()
 log = logging.getLogger('discord')
 ACCOUNTS_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'accounts.json')
 CURRENCY = '𝔻'

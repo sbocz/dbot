@@ -1,0 +1,12 @@
+[
+    {
+        "value": 100,
+        "available": 1000,
+        "ticker": "SNEK"
+    },
+    {
+        "value": 100,
+        "available": 1000,
+        "ticker": "DBOT"
+    }
+]

@@ -1,0 +1,5 @@
+aiohttp==3.8.4
+discord.py==2.2.3
+python-dotenv==1.0.0
+ratelimit==2.2.1
+scipy==1.10.1
