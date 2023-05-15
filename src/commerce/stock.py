@@ -1,10 +1,11 @@
 import logging
 
-log = logging.getLogger('discord')
+log = logging.getLogger("discord")
 
 
 class Stock:
     """Stock data object"""
+
     available: int
     value: int
     ticker: str
@@ -17,4 +18,8 @@ class Stock:
     @staticmethod
     def from_dict(dictionary):
         """Constructs a Stock from a dictionary"""
-        return Stock(str(dictionary['ticker']), int(dictionary['available']), int(dictionary['value']))
+        return Stock(
+            str(dictionary["ticker"]),
+            int(dictionary["available"]),
+            int(dictionary["value"]),
+        )

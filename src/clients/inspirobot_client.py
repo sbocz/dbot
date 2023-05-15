@@ -1,12 +1,13 @@
 import logging
 import aiohttp
 
-log = logging.getLogger('discord')
-INSPIROBOT_GENERATE_URL = 'https://inspirobot.me/api?generate=true'
+log = logging.getLogger("discord")
+INSPIROBOT_GENERATE_URL = "https://inspirobot.me/api?generate=true"
 
 
 class InspirobotClient:
     """Client for interacting with inspirobot"""
+
     def __init__(self):
         self.generate_url = INSPIROBOT_GENERATE_URL
 

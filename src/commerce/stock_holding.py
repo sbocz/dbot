@@ -1,6 +1,6 @@
 import logging
 
-log = logging.getLogger('discord')
+log = logging.getLogger("discord")
 
 
 class StockHolding:
@@ -15,4 +15,4 @@ class StockHolding:
 
     @staticmethod
     def from_dict(d):
-        return StockHolding(str(d['ticker']), int(d['owner_id']), int(d['quantity']))
+        return StockHolding(str(d["ticker"]), int(d["owner_id"]), int(d["quantity"]))

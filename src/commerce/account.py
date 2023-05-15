@@ -3,6 +3,7 @@ from datetime import datetime
 
 class Account:
     """Account data object"""
+
     account_id: int
     interest_date: datetime
     value: int
@@ -35,4 +36,8 @@ class Account:
     @staticmethod
     def from_dict(dictionary):
         """Constructs an Account from a disctionary"""
-        return Account(int(dictionary['account_id']), int(dictionary['value']), datetime.fromtimestamp(int(float(dictionary['interest_date']))))
+        return Account(
+            int(dictionary["account_id"]),
+            int(dictionary["value"]),
+            datetime.fromtimestamp(int(float(dictionary["interest_date"]))),
+        )
