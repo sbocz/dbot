@@ -1,16 +1,15 @@
 import logging
-import os
 import random
 
 from scipy import stats
 
 from commerce.stock import Stock
 from commerce.stock_holding import StockHolding
-from utility import read_json_from_file, write_json_to_file
+from data_access import read_json_from_file, write_json_to_file
 
-log = logging.getLogger('discord')
-STOCKS_FILE = 'stocks.json'
-STOCK_HOLDINGS_FILE = 'stock_holdings.json'
+log = logging.getLogger("discord")
+STOCKS_FILE = "stocks.json"
+STOCK_HOLDINGS_FILE = "stock_holdings.json"
 MAX_BASE_VOLATILITY = 0.2
 TETHER = 1000
 MAX_TETHER_VOLATILITY = 0.17
@@ -23,9 +22,10 @@ TETHER_SWING_CHANCE = 0.25
 
 class Market:
     """Defines a randomized market with a set of stocks"""
-    def __init__(self, brain_path: str):
-        self.stocks = self.load_stocks(os.path.join(brain_path, STOCKS_FILE))
-        self.stock_holdings = self.load_stock_holdings(os.path.join(brain_path, STOCK_HOLDINGS_FILE))
+
+    def __init__(self):
+        self.stocks = self.load_stocks(STOCKS_FILE)
+        self.stock_holdings = self.load_stock_holdings(STOCK_HOLDINGS_FILE)
         self.random = random
 
     @staticmethod
@@ -55,7 +55,7 @@ class Market:
         return stock_holdings
 
     def save_stock_holdings(self):
-        '''Back up stock holding data'''
+        """Back up stock holding data"""
         stock_holdings_list = []
         for holding in self.stock_holdings:
             stock_holdings_list.append(holding.__dict__)
@@ -63,11 +63,13 @@ class Market:
 
     @staticmethod
     def big_swing(stocks, price):
-        '''Calculates a larger than normal swing in the price with better odds for worse performing stocks'''
+        """Calculates a larger than normal swing in the price with better odds for worse performing stocks"""
         stock_values = [stock.value for stock in stocks]
         position = stats.percentileofscore(stock_values, price) / 100
         need_for_pos = MAX_PERCENTILE_FOR_BIG_SWING - position
-        percent_swing = (BIG_SWING_MIN + random.random() * (BIG_SWING_MAX - BIG_SWING_MIN)) / 100
+        percent_swing = (
+            BIG_SWING_MIN + random.random() * (BIG_SWING_MAX - BIG_SWING_MIN)
+        ) / 100
         price_change = price * percent_swing
         if random.random() < need_for_pos or random.random() > 0.5:
             return price_change
@@ -76,7 +78,7 @@ class Market:
 
     @staticmethod
     def tether_swing(price, tether):
-        '''Calculates a change in stock price that brings it closer to the tether amount'''
+        """Calculates a change in stock price that brings it closer to the tether amount"""
         change = random.random() * MAX_TETHER_VOLATILITY
         if price > tether:
             return -1 * change
@@ -84,16 +86,16 @@ class Market:
 
     @staticmethod
     def normal_swing(price):
-        '''Calculates a normal swing in a stock price'''
+        """Calculates a normal swing in a stock price"""
         volatility_ratio = random.random()
         volatility = volatility_ratio * MAX_BASE_VOLATILITY
         # Avg < 0
         rand_change = (random.random() * 2) - 1.1
-        volatility_mod = ((volatility_ratio * 2.0) * (volatility_ratio * 2.0) / 100.0)
+        volatility_mod = (volatility_ratio * 2.0) * (volatility_ratio * 2.0) / 100.0
         return ((rand_change * volatility) + volatility_mod) * price
 
     def get_change(self, price):
-        '''Calculates a change in a price'''
+        """Calculates a change in a price"""
         if random.random() < BIG_SWING_CHANCE:
             return self.big_swing(self.stocks, price)
         elif random.random() < TETHER_SWING_CHANCE:
@@ -102,8 +104,15 @@ class Market:
             return self.normal_swing(price)
 
     def update_holding(self, account_id: int, ticker: str, change: int):
-        '''Adjusts an account's stock holding based on the value provided'''
-        existing_holding = next(filter(lambda stock_holding: stock_holding.owner_id == account_id and stock_holding.ticker == ticker, self.stock_holdings), None)
+        """Adjusts an account's stock holding based on the value provided"""
+        existing_holding = next(
+            filter(
+                lambda stock_holding: stock_holding.owner_id == account_id
+                and stock_holding.ticker == ticker,
+                self.stock_holdings,
+            ),
+            None,
+        )
         if existing_holding is None:
             self.stock_holdings.append(StockHolding(ticker, account_id, change))
         else:
@@ -111,13 +120,25 @@ class Market:
         self.save_stock_holdings()
 
     def get_holding(self, account_id: int, ticker: str) -> StockHolding:
-        '''Retrieves a StockHolding for an account ticker pair'''
-        return next(filter(lambda stock_holding: stock_holding.owner_id == account_id and stock_holding.ticker == ticker, self.stock_holdings), None)
+        """Retrieves a StockHolding for an account ticker pair"""
+        return next(
+            filter(
+                lambda stock_holding: stock_holding.owner_id == account_id
+                and stock_holding.ticker == ticker,
+                self.stock_holdings,
+            ),
+            None,
+        )
 
     def get_holdings(self, account_id: int):
-        '''Retrieves all holdings for an account'''
-        return list(filter(lambda stock_holding: stock_holding.owner_id == account_id, self.stock_holdings))
+        """Retrieves all holdings for an account"""
+        return list(
+            filter(
+                lambda stock_holding: stock_holding.owner_id == account_id,
+                self.stock_holdings,
+            )
+        )
 
     def get_stock(self, ticker: str) -> Stock:
-        '''Retrieves a stock from a ticker provided'''
+        """Retrieves a stock from a ticker provided"""
         return next(filter(lambda stock: stock.ticker == ticker, self.stocks), None)
