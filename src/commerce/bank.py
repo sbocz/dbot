@@ -2,13 +2,11 @@ import logging
 import os
 from datetime import datetime
 
-from dotenv import load_dotenv
-
-from src.commerce.account import Account
-from src.utility import read_json_from_file, write_json_to_file
+from commerce.account import Account
+from utility import read_json_from_file, write_json_to_file
 
 log = logging.getLogger('discord')
-ACCOUNTS_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'accounts.json')
+ACCOUNTS_FILE = 'accounts.json'
 CURRENCY = '𝔻'
 HOURS_FOR_INTEREST = 24
 INTEREST_VALUE = 20
@@ -16,8 +14,8 @@ INTEREST_VALUE = 20
 
 class Bank:
     """A bank contains a set of accounts and allows transactions between those accounts"""
-    def __init__(self):
-        self.accounts = self.load_accounts(ACCOUNTS_FILE)
+    def __init__(self, brain_path: str):
+        self.accounts = self.load_accounts(os.path.join(brain_path, ACCOUNTS_FILE))
 
     @staticmethod
     def load_accounts(filename):

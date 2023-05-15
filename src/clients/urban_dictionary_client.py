@@ -2,7 +2,7 @@ import logging
 import urllib.parse
 import aiohttp
 
-from src.clients.models.definition import Definition
+from clients.models.definition import Definition
 
 log = logging.getLogger('discord')
 URBAN_DICTIONARY_API_URL = 'http://api.urbandictionary.com/v0/define'

@@ -8,16 +8,16 @@ import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
 
-from src.clients.inspirobot_client import InspirobotClient
-from src.clients.urban_dictionary_client import UrbanDictionaryClient
-from src.status import Status
-from src.utility import read_json_from_file, write_json_to_file
+from clients.inspirobot_client import InspirobotClient
+from clients.urban_dictionary_client import UrbanDictionaryClient
+from status import Status
+from utility import read_json_from_file, write_json_to_file
 
 # File constants
-YELL_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'yell.json')
-YELL_BLACKLIST_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'yell_blacklist.json')
-FORTUNES = os.path.join(os.getenv('BRAIN_PATH'), 'fortunes.json')
-STATUSES_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'statuses.json')
+YELL_FILE = 'yell.json'
+YELL_BLACKLIST_FILE = 'yell_blacklist.json'
+FORTUNES = 'fortunes.json'
+STATUSES_FILE = 'statuses.json'
 
 RATE = 10
 PERIOD = 120
@@ -26,15 +26,15 @@ log = logging.getLogger('discord')
 
 class GenericCog(commands.Cog, name='Generic'):
     """Generic and miscellaneous commands"""
-    def __init__(self, bot, inspirobot: InspirobotClient, urban_dictionary: UrbanDictionaryClient):
+    def __init__(self, bot, inspirobot: InspirobotClient, urban_dictionary: UrbanDictionaryClient, brain_path: str):
         self.urban_dictionary = urban_dictionary
         self.inspirobot = inspirobot
         self.bot = bot
         self._last_member = None
-        self.yell_list = read_json_from_file(YELL_FILE)
-        self.yell_blacklist = read_json_from_file(YELL_BLACKLIST_FILE)
-        self.fortunes = read_json_from_file(FORTUNES)
-        self.statuses = self.build_statuses(STATUSES_FILE)
+        self.yell_list = read_json_from_file(os.path.join(brain_path, YELL_FILE))
+        self.yell_blacklist = read_json_from_file(os.path.join(brain_path, YELL_BLACKLIST_FILE))
+        self.fortunes = read_json_from_file(os.path.join(brain_path, FORTUNES))
+        self.statuses = self.build_statuses(os.path.join(brain_path, STATUSES_FILE))
 
     @commands.Cog.listener()
     async def on_member_join(self, member):

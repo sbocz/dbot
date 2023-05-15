@@ -2,10 +2,10 @@ import logging
 import discord
 from discord.ext import commands, tasks
 
-from src.commerce.bank import Bank
-from src.commerce.market import Market
-from src.commerce.stock import Stock
-from src.commerce.stock_holding import StockHolding
+from commerce.bank import Bank
+from commerce.market import Market
+from commerce.stock import Stock
+from commerce.stock_holding import StockHolding
 
 log = logging.getLogger('discord')
 

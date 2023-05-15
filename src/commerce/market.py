@@ -2,16 +2,15 @@ import logging
 import os
 import random
 
-from dotenv import load_dotenv
 from scipy import stats
-from src.commerce.stock import Stock
-from src.commerce.stock_holding import StockHolding
-from src.utility import read_json_from_file, write_json_to_file
+
+from commerce.stock import Stock
+from commerce.stock_holding import StockHolding
+from utility import read_json_from_file, write_json_to_file
 
 log = logging.getLogger('discord')
-load_dotenv()
-STOCKS_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'stocks.json')
-STOCK_HOLDINGS_FILE = os.path.join(os.getenv('BRAIN_PATH'), 'stock_holdings.json')
+STOCKS_FILE = 'stocks.json'
+STOCK_HOLDINGS_FILE = 'stock_holdings.json'
 MAX_BASE_VOLATILITY = 0.2
 TETHER = 1000
 MAX_TETHER_VOLATILITY = 0.17
@@ -24,9 +23,9 @@ TETHER_SWING_CHANCE = 0.25
 
 class Market:
     """Defines a randomized market with a set of stocks"""
-    def __init__(self):
-        self.stocks = self.load_stocks(STOCKS_FILE)
-        self.stock_holdings = self.load_stock_holdings(STOCK_HOLDINGS_FILE)
+    def __init__(self, brain_path: str):
+        self.stocks = self.load_stocks(os.path.join(brain_path, STOCKS_FILE))
+        self.stock_holdings = self.load_stock_holdings(os.path.join(brain_path, STOCK_HOLDINGS_FILE))
         self.random = random
 
     @staticmethod

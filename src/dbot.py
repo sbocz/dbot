@@ -1,33 +1,28 @@
-import os
-import sys
-import logging
-import discord
 import asyncio
+import logging
+import os
 
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-env_path = '../config/.env'
-# Set env vars before other modules are initializied which use env vars to locate data files
-load_dotenv(dotenv_path=env_path)
 
-sys.path.append(os.pardir)
-sys.path.append(os.path.join(os.pardir, os.pardir))
-
-from src.clients.inspirobot_client import InspirobotClient
-from src.clients.urban_dictionary_client import UrbanDictionaryClient
-from src.cogs.stock_cog import StockCog
-from src.commerce.bank import Bank
-from src.cogs.dbucks_cog import DbucksCog
-from src.cogs.generic_cog import GenericCog
-from src.commerce.market import Market
+from clients.inspirobot_client import InspirobotClient
+from clients.urban_dictionary_client import UrbanDictionaryClient
+from cogs.dbucks_cog import DbucksCog
+from cogs.generic_cog import GenericCog
+from cogs.stock_cog import StockCog
+from commerce.bank import Bank
+from commerce.market import Market
 
 # Load environment variables
-TOKEN = os.getenv('DISCORD_TOKEN')
-COMMAND_PREFIX = os.getenv('COMMAND_PREFIX').split('|')
+env_path = '../config/.env'
+load_dotenv(dotenv_path=env_path)
+token = os.getenv('DISCORD_TOKEN')
+command_prefix = os.getenv('COMMAND_PREFIX').split('|')
 if os.getenv('COMMAND_WITH_SPACE'):
-    for i, prefix in enumerate(COMMAND_PREFIX):
-        COMMAND_PREFIX[i] = prefix + ' '
-BRAIN_PATH = os.getenv('BRAIN_PATH')
+    for i, prefix in enumerate(command_prefix):
+        command_prefix[i] = prefix + ' '
+brain_path = os.getenv('BRAIN_PATH')
 
 # Set up logger
 logger = logging.getLogger('discord')
@@ -40,17 +35,17 @@ logger.addHandler(handler)
 
 # Initialize bot
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents, description='Discord bot tapped into Esbee\'s subconscious')
+bot = commands.Bot(command_prefix=command_prefix, intents=intents, description='Discord bot tapped into Esbee\'s subconscious')
 
-bank = Bank()
-market = Market()
+bank = Bank(brain_path)
+market = Market(brain_path)
 
 
 async def main():
     async with bot:
-        await bot.add_cog(GenericCog(bot, InspirobotClient(), UrbanDictionaryClient()))
+        await bot.add_cog(GenericCog(bot, InspirobotClient(), UrbanDictionaryClient(), brain_path))
         await bot.add_cog(DbucksCog(bot, bank))
         await bot.add_cog(StockCog(bot, bank, market))
-        await bot.start(TOKEN)
+        await bot.start(token)
 
 asyncio.run(main())

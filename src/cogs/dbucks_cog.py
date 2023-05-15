@@ -5,7 +5,7 @@ from operator import itemgetter
 import discord
 from discord.ext import commands, tasks
 
-from src.commerce.bank import Bank
+from commerce.bank import Bank
 
 log = logging.getLogger('discord')
 CURRENCY = '𝔻'
