@@ -6,4 +6,4 @@ cd src/
 mkdir -p logs
 touch logs/app.log
 
-nohup python3 dbot.py &> logs/app.log 2>&1 &
+nohup python3.8 dbot.py &> logs/app.log 2>&1 &
