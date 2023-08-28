@@ -17,4 +17,4 @@ else
     exit 1
 fi
 
-pip3.8 install -r requirements.txt
+python3.8 -m pip install -r requirements.txt
