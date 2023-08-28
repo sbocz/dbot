@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import os
 
 import discord
@@ -32,7 +33,9 @@ logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
 if not os.path.exists("logs"):
     os.makedirs("logs")
-handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8")
+handler = TimedRotatingFileHandler(
+    filename="logs/discord.log", encoding="utf-8", when="h", interval=1, backupCount=96
+)
 handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
 )
