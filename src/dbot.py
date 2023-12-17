@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from clients.inspirobot_client import InspirobotClient
 from clients.urban_dictionary_client import UrbanDictionaryClient
+from clients.assistant_client import AssistantClient
 from cogs.dbucks_cog import DbucksCog
 from cogs.generic_cog import GenericCog
 from cogs.stock_cog import StockCog
@@ -55,7 +56,11 @@ market = Market()
 
 async def main():
     async with bot:
-        await bot.add_cog(GenericCog(bot, InspirobotClient(), UrbanDictionaryClient()))
+        await bot.add_cog(
+            GenericCog(
+                bot, InspirobotClient(), UrbanDictionaryClient(), AssistantClient()
+            )
+        )
         await bot.add_cog(DbucksCog(bot, bank))
         await bot.add_cog(StockCog(bot, bank, market))
         await bot.start(token)

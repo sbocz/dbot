@@ -4,11 +4,12 @@ import traceback
 
 import discord
 from discord.ext import commands, tasks
-from discord.ext.commands import BucketType
+from discord.ext.commands import BucketType, Bot, Context
 from ratelimit import limits
 
 from clients.inspirobot_client import InspirobotClient
 from clients.urban_dictionary_client import UrbanDictionaryClient
+from clients.assistant_client import AssistantClient
 from data_access import read_json_from_file, write_json_to_file
 from status import Status
 
@@ -28,12 +29,14 @@ class GenericCog(commands.Cog, name="Generic"):
 
     def __init__(
         self,
-        bot,
+        bot: Bot,
         inspirobot: InspirobotClient,
         urban_dictionary: UrbanDictionaryClient,
+        ai_assistant: AssistantClient,
     ):
         self.urban_dictionary = urban_dictionary
         self.inspirobot = inspirobot
+        self.ai_assistant = ai_assistant
         self.bot = bot
         self._last_member = None
         self.yell_list = read_json_from_file(YELL_FILE)
@@ -72,6 +75,20 @@ class GenericCog(commands.Cog, name="Generic"):
                 "My mother taught me not to say things like that!"
             )
         return
+
+    @commands.command()
+    @commands.cooldown(RATE, PERIOD, BucketType.user)
+    async def chat(self, ctx: Context):
+        """Interacts with an AI chat assistant."""
+        log.info(f"Firing 'ai_chat' command for message '{ctx.message.content}'")
+        # Only get text after 'chat' command term
+        chat_message = ctx.message.content.split("chat ", 1)[1]
+        reply = await self.ai_assistant.chat(
+            thread_id=ctx.message.channel.id, message=chat_message
+        )
+
+        log.info(f"GOT REPLY:'{reply}'")
+        await ctx.send(reply)
 
     @commands.command()
     @commands.cooldown(RATE, PERIOD, BucketType.user)
@@ -212,6 +229,9 @@ _{definition.word}_ \n
         # here you can handle all other types of exceptions.
 
         else:
+            log.error(
+                f"Unexpected error: \n'{traceback.format_exception(type(error), error, error.__traceback__)}' "
+            )
             await ctx.send(
                 "An unexpected error has occurred and my developer has been notified, sorry."
             )

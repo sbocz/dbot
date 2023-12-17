@@ -5,6 +5,7 @@ Discord bot with a variety of capabilities.
 | Command       | Description                                             |
 | ------------- | ------------------------------------------------------- |
 | 8ball         | Fortunes from beyond.                                   |
+| chat          | Interacts with an AI chat assistant.                    |
 | choose        | Chooses between multiple choices.                       |
 | define        | Define a term.                                          |
 | inspire       | For when you need a pick-me-up.                         |
